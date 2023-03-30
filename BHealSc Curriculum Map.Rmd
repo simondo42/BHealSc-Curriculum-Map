@@ -145,17 +145,17 @@ make_paper_assess_info <- function(Papers, Paper = "CMHC 201") {
 ```
 
 ```{r load}
-Outcomes <- read_xlsx(path = "../BHealSc Info/Programme Data/2022 Major - Papers - Outcome Map.xlsx",
+Outcomes <- read_xlsx(path = "./2022 Major - Papers - Outcome Map.xlsx",
                               sheet = "BHealSc Outcomes") %>%
   separate(col = Outcomes,
            into = c("BHealSc_Outcome", "Otago_Attribute"),
            sep = "\r\n") %>%
   mutate(Outcome = paste0(BHealSc_Outcome, "\n", "Otago_Attribute"))
 
-Map_Outcomes <- read_xlsx(path = "../BHealSc Info/Programme Data/2022 Major - Papers - Outcome Map.xlsx",
+Map_Outcomes <- read_xlsx(path = "./2022 Major - Papers - Outcome Map.xlsx",
                               sheet = "BHealSc Outcomes")
 
-CMHC <- read_xlsx(path = "../BHealSc Info/Programme Data/2022 Major - Papers - Outcome Map.xlsx",
+CMHC <- read_xlsx(path = "./2022 Major - Papers - Outcome Map.xlsx",
                           sheet = "CMHC") %>%
   separate(col = Paper,
            into = c("Paper_Code", "Paper_Title"),
@@ -186,7 +186,7 @@ CMHC_edges <- CMHC %>%
          group = substr(label.x, 6, 6)) %>%
   distinct()
 
-MAOH <- read_xlsx(path = "../BHealSc Info/Programme Data/2022 Major - Papers - Outcome Map.xlsx",
+MAOH <- read_xlsx(path = "./2022 Major - Papers - Outcome Map.xlsx",
                           sheet = "MAOH") %>%
   separate(col = Paper,
            into = c("Paper_Code", "Paper_Title"),
@@ -216,7 +216,7 @@ MAOH_edges <- MAOH %>%
          group = substr(label.x, 6, 6)) %>%
   distinct()
 
-PACH <- read_xlsx(path = "../BHealSc Info/Programme Data/2022 Major - Papers - Outcome Map.xlsx",
+PACH <- read_xlsx(path = "./2022 Major - Papers - Outcome Map.xlsx",
                           sheet = "PACH") %>%
   separate(col = Paper,
            into = c("Paper_Code", "Paper_Title"),
@@ -246,7 +246,7 @@ PACH_edges <- PACH %>%
          group = substr(label.x, 6, 6)) %>%
   distinct()
 
-PUBH <- read_xlsx(path = "../BHealSc Info/Programme Data/2022 Major - Papers - Outcome Map.xlsx",
+PUBH <- read_xlsx(path = "./2022 Major - Papers - Outcome Map.xlsx",
                           sheet = "PUBH") %>%
   separate(col = Paper,
            into = c("Paper_Code", "Paper_Title"),
@@ -278,7 +278,7 @@ PUBH_edges <- PUBH %>%
 
 
 
-Papers <- read_xlsx(path = "../BHealSc Info/Programme Data/2022 Major - Papers - Outcome Map.xlsx",
+Papers <- read_xlsx(path = "./2022 Major - Papers - Outcome Map.xlsx",
                           sheet = "Papers") %>% 
   filter(Year == Reporting_Year)
 ```
