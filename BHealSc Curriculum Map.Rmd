@@ -1,0 +1,316 @@
+---
+title: "BHealSc Curriculum Map"
+#author: Simon Horsburgh
+output: 
+  flexdashboard::flex_dashboard:
+    theme:
+      bootswatch: flatly
+#      css: style.css
+      base_font:
+          google: "Open Sans"
+#      navbar-bg: #003D79
+      version: 4
+      # base_font:
+      #   google: Prompt
+      # code_font:
+        # google: JetBrains Mono
+    orientation: columns
+    vertical_layout: fill
+---
+ 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+library(flexdashboard)
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(htmlwidgets)
+library(networkD3)
+#library(showtext)
+library(tippy)
+library(DiagrammeR)
+# Install thematic and un-comment for themed static plots (i.e., ggplot2)
+# thematic::thematic_rmd()
+
+Year <- 2022
+```
+
+```{r functions}
+make_tippy <- function(letter = "a",
+                       BHealSc_Outcome = " ",
+                       Otago_Outcome = " ",
+                       Detail = " ") {
+
+  letter <- paste0("<p><strong>", letter, "</strong>")
+  BHealSc_Outcome = paste0(BHealSc_Outcome, "<br>")
+  Otago_Outcome = paste0("<em>", Otago_Outcome, "</em></p>")
+  Detail = paste0("<span style='font-size:14px; text-align:left'><ol type='i'>", Detail, "</ol><span>")
+
+  return(tippy(text = paste0(letter, " ", BHealSc_Outcome, " ", Otago_Outcome),
+        tooltip = Detail,
+        allowHTML = TRUE,
+        arrow = TRUE,
+        inertia = TRUE,
+        interactive = TRUE,
+        theme = "light")
+  )
+}
+
+make_paper_info <- function(Papers, Paper = "CMHC 201") {
+
+  Objs <- Papers %>%
+      filter(PaperCode == Paper) %>%
+      separate(col = Objectives,
+             into = c("O1", "O2", "O3", "O4", "O5", "O6", "O7", "O8", "O9", "O10", "O11", "O12", "O13", "O14", "O15"),
+             sep = ";",
+             remove = FALSE) %>%
+    replace_na(list(O1 = " ",
+                    O2 = " ",
+                    O3 = " ",
+                    O4 = " ",
+                    O5 = " ",
+                    O6 = " ",
+                    O7 = " ",
+                    O8 = " ",
+                    O9 = " ",
+                    O10 = " ",
+                    O11 = " ",
+                    O12 = " ",
+                    O13 = " ",
+                    O14 = " ",
+                    O15 = " "
+                    ))
+
+  text <- paste0("<p><strong>Learning Objectives</strong></p><ol type='1'>")
+  for(i in 0:14) {
+    text <- paste0(text, ifelse(Objs[1, (match("O1", names(Objs)) + i)] == " ",
+                                "",
+                                paste0("<li>", Objs[1, (match("O1", names(Objs)) + i)], "</li>"))
+    )
+  }
+  text <- paste0(text, "</ol><br>")
+
+  return(text)
+}
+
+make_paper_assess_info <- function(Papers, Paper = "CMHC 201") {
+  Assess <- Papers %>%
+    filter(PaperCode == Paper) %>%
+    separate(col = IA_Description,
+              into = c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10"),
+              sep = ";",
+              remove = FALSE) %>%
+    separate(col = IA_Weight,
+              into = c("W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9", "W10"),
+              sep = ";",
+              remove = FALSE) %>%
+    replace_na(list(A1 = " ",
+                    A2 = " ",
+                    A3 = " ",
+                    A4 = " ",
+                    A5 = " ",
+                    A6 = " ",
+                    A7 = " ",
+                    A8 = " ",
+                    A9 = " ",
+                    A10 = " ",
+                    W1 = " ",
+                    W2 = " ",
+                    W3 = " ",
+                    W4 = " ",
+                    W5 = " ",
+                    W6 = " ",
+                    W7 = " ",
+                    W8 = " ",
+                    W9 = " ",
+                    W10 = " "))
+    text <- paste0("<p><strong>Paper Assessments</strong></p><table id='table_", Paper, "'><tr><th>Assessment</th><th>Weight</th></tr>")
+
+  for(i in 0:9) {
+    text <- paste0(text, ifelse(Assess[1, (match("A1", names(Assess)) + i)] == " ",
+                                "",
+                                paste0("<tr><td>", Assess[1, (match("A1", names(Assess)) + i)], "</td><td>", Assess[1, (match("W1", names(Assess)) + i)], "</td></tr>"))
+    )
+  }
+  text <- paste0(text, "</table><br>")
+
+  return(text)
+
+}
+```
+
+```{r load}
+Outcomes <- read_xlsx(path = "../BHealSc Info/Programme Data/2020 Major - Papers - Outcome Map.xlsx",
+                              sheet = "BHealSc Outcomes") %>%
+  filter(Year == Year) %>%
+  separate(col = Outcomes,
+           into = c("BHealSc_Outcome", "Otago_Attribute"),
+           sep = "\r\n") %>%
+  mutate(Outcome = paste0(BHealSc_Outcome, "\n", "Otago_Attribute"))
+
+Map_Outcomes <- readxl::read_xlsx(path = "../BHealSc Info/Programme Data/2020 Major - Papers - Outcome Map.xlsx",
+                              sheet = "BHealSc Outcomes")
+
+CMHC <- readxl::read_xlsx(path = "../BHealSc Info/Programme Data/2020 Major - Papers - Outcome Map.xlsx",
+                          sheet = "CMHC") %>%
+  filter(Year == Year) %>%
+  separate(col = Paper,
+           into = c("Paper_Code", "Paper_Title"),
+           sep = "[(]") %>%
+  separate(col = `BHealSc Outcome`,
+           into = c("BHealSc_Outcome", "Otago_Attribute"),
+           sep = "\r\n") %>%
+  mutate(Paper_Title = paste0("(", Paper_Title),
+         Paper_Code = str_remove(Paper_Code, coll("\r\n")),
+         Paper = paste0("<b>", Paper_Code, "</b>\n<i>", Paper_Title, "</i>"),
+         Outcome = paste0(BHealSc_Outcome, "\n<i>", Otago_Attribute, "</i>"))
+         #Outcome = factor(Outcome, levels = Outcomes$Outcome))
+
+CMHC_nodes <- c(unique(CMHC$Paper), sort(unique(CMHC$Outcome)))
+CMHC_nodes <- tibble(id = seq_len(length(CMHC_nodes)), Node = CMHC_nodes) %>%
+  left_join(select(CMHC, Paper, Paper_Code),
+            by = c("Node" = "Paper")) %>%
+  rename(label = Paper_Code) %>%
+  distinct() %>%
+  mutate(type = if_else(substr(Node, 1, 1) == "<", TRUE, FALSE),
+         layer = if_else(substr(Node, 1, 1) == "<", 1, 2),
+         label = if_else(is.na(label), substr(Node, 1, 1), label))
+CMHC_edges <- CMHC %>%
+  left_join(CMHC_nodes, by = c("Paper" = "Node")) %>%
+  left_join(CMHC_nodes, by = c("Outcome" = "Node")) %>%
+  select(from = id.x, to = id.y, label.x) %>%
+  mutate(weight = 1,
+         group = substr(label.x, 6, 6)) %>%
+  distinct()
+
+MAOH <- readxl::read_xlsx(path = "../BHealSc Info/Programme Data/2020 Major - Papers - Outcome Map.xlsx",
+                          sheet = "MAOH") %>%
+  filter(Year == Year) %>%
+  separate(col = Paper,
+           into = c("Paper_Code", "Paper_Title"),
+           sep = "[(]") %>%
+  separate(col = `BHealSc Outcome`,
+           into = c("BHealSc_Outcome", "Otago_Attribute"),
+           sep = "\r\n") %>%
+  mutate(Paper_Title = paste0("(", Paper_Title),
+         Paper_Code = str_remove(Paper_Code, coll("\r\n")),
+         Paper = paste0("<b>", Paper_Code, "</b>\n<i>", Paper_Title, "</i>"),
+         Outcome = paste0(BHealSc_Outcome, "\n<i>", Otago_Attribute, "</i>"))
+
+MAOH_nodes <- c(unique(MAOH$Paper), sort(unique(MAOH$Outcome)))
+MAOH_nodes <- tibble(id = seq_len(length(MAOH_nodes)), Node = MAOH_nodes) %>%
+  left_join(select(MAOH, Paper, Paper_Code),
+            by = c("Node" = "Paper")) %>%
+  rename(label = Paper_Code) %>%
+  distinct() %>%
+  mutate(type = if_else(substr(Node, 1, 1) == "<", TRUE, FALSE),
+         layer = if_else(substr(Node, 1, 1) == "<", 1, 2),
+         label = if_else(is.na(label), substr(Node, 1, 1), label))
+MAOH_edges <- MAOH %>%
+  left_join(MAOH_nodes, by = c("Paper" = "Node")) %>%
+  left_join(MAOH_nodes, by = c("Outcome" = "Node")) %>%
+  select(from = id.x, to = id.y, label.x) %>%
+  mutate(weight = 1,
+         group = substr(label.x, 6, 6)) %>%
+  distinct()
+
+PACH <- readxl::read_xlsx(path = "../BHealSc Info/Programme Data/2020 Major - Papers - Outcome Map.xlsx",
+                          sheet = "PACH") %>%
+  filter(Year == Year) %>%
+  separate(col = Paper,
+           into = c("Paper_Code", "Paper_Title"),
+           sep = "[(]") %>%
+  separate(col = `BHealSc Outcome`,
+           into = c("BHealSc_Outcome", "Otago_Attribute"),
+           sep = "\r\n") %>%
+  mutate(Paper_Title = paste0("(", Paper_Title),
+         Paper_Code = str_remove(Paper_Code, coll("\r\n")),
+         Paper = paste0("<b>", Paper_Code, "</b>\n<i>", Paper_Title, "</i>"),
+         Outcome = paste0(BHealSc_Outcome, "\n<i>", Otago_Attribute, "</i>"))
+
+PACH_nodes <- c(unique(PACH$Paper), sort(unique(PACH$Outcome)))
+PACH_nodes <- tibble(id = seq_len(length(PACH_nodes)), Node = PACH_nodes) %>%
+  left_join(select(PACH, Paper, Paper_Code),
+            by = c("Node" = "Paper")) %>%
+  rename(label = Paper_Code) %>%
+  distinct() %>%
+  mutate(type = if_else(substr(Node, 1, 1) == "<", TRUE, FALSE),
+         layer = if_else(substr(Node, 1, 1) == "<", 1, 2),
+         label = if_else(is.na(label), substr(Node, 1, 1), label))
+PACH_edges <- PACH %>%
+  left_join(PACH_nodes, by = c("Paper" = "Node")) %>%
+  left_join(PACH_nodes, by = c("Outcome" = "Node")) %>%
+  select(from = id.x, to = id.y, label.x) %>%
+  mutate(weight = 1,
+         group = substr(label.x, 6, 6)) %>%
+  distinct()
+
+PUBH <- readxl::read_xlsx(path = "../BHealSc Info/Programme Data/2020 Major - Papers - Outcome Map.xlsx",
+                          sheet = "PUBH") %>%
+  filter(Year == Year) %>%
+  separate(col = Paper,
+           into = c("Paper_Code", "Paper_Title"),
+           sep = "[(]") %>%
+  separate(col = `BHealSc Outcome`,
+           into = c("BHealSc_Outcome", "Otago_Attribute"),
+           sep = "\r\n") %>%
+  mutate(Paper_Title = paste0("(", Paper_Title),
+         Paper_Code = str_remove(Paper_Code, coll("\r\n")),
+         Paper = paste0("<b>", Paper_Code, "</b>\n<i>", Paper_Title, "</i>"),
+         Outcome = paste0(BHealSc_Outcome, "\n<i>", Otago_Attribute, "</i>"))
+
+PUBH_nodes <- c(unique(PUBH$Paper), sort(unique(PUBH$Outcome)))
+PUBH_nodes <- tibble(id = seq_len(length(PUBH_nodes)), Node = PUBH_nodes) %>%
+  left_join(select(PUBH, Paper, Paper_Code),
+            by = c("Node" = "Paper")) %>%
+  rename(label = Paper_Code) %>%
+  distinct() %>%
+  mutate(type = if_else(substr(Node, 1, 1) == "<", TRUE, FALSE),
+         layer = if_else(substr(Node, 1, 1) == "<", 1, 2),
+         label = if_else(is.na(label), substr(Node, 1, 1), label))
+PUBH_edges <- PUBH %>%
+  left_join(PUBH_nodes, by = c("Paper" = "Node")) %>%
+  left_join(PUBH_nodes, by = c("Outcome" = "Node")) %>%
+  select(from = id.x, to = id.y, label.x) %>%
+  mutate(weight = 1,
+         group = substr(label.x, 6, 6)) %>%
+  distinct()
+
+
+
+Papers <- readxl::read_xlsx(path = "../BHealSc Info/Programme Data/2020 Major - Papers - Outcome Map.xlsx",
+                          sheet = "Papers")
+```
+
+Column {data-width=650 .tabset}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+
+```
+
+### Chart B
+
+```{r}
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart C
+
+```{r}
+
+```
+
+### Chart D
+
+```{r}
+
+```
+
