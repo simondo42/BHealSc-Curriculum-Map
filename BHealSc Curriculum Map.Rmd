@@ -47,11 +47,10 @@ make_tippy <- function(letter = "a",
                        Detail = " ") {
 
   letter <- paste0("<p><strong>", letter, "</strong>")
-  BHealSc_Outcome = paste0(BHealSc_Outcome, "<br>")
-  Otago_Outcome = paste0("<em>", Otago_Outcome, "</em></p>")
+  BHealSc_Outcome = paste0(BHealSc_Outcome, "  <em>", Otago_Outcome, "</em></p>")
   Detail = paste0("<span style='font-size:14px; text-align:left'><ol type='i'>", Detail, "</ol><span>")
 
-  return(tippy(text = paste0(letter, " ", BHealSc_Outcome, " ", Otago_Outcome),
+  return(tippy(text = paste0(letter, " ", BHealSc_Outcome),
         tooltip = Detail,
         allowHTML = TRUE,
         arrow = TRUE,
@@ -299,18 +298,17 @@ for (i in 1:nrow(Outcomes)) {
 
 GAs <- GAs %>%
   mutate(BHealSc_Outcome = str_sub(BHealSc_Outcome, 3),
-         OA = str_sub(OA, start = 2, end = -2))
+         OA = str_sub(OA, start = 2, end = -2),
+         AD = paste0("<par><ol type='i'>", AD, "</ol></par>"))
 
-for (i in 1:nrow(Outcomes)) {
-  cat('\n')
-  cat(paste0('### **', Outcomes$BHealSc_Outcome[i], "**\n"))
-  cat(paste0("_",Outcomes$Otago_Attribute[i], "_\n"))
-  cat(HTML("<par><ol type='i'>", Outcomes$Detail[i], "</ol></par>"))
-  cat("\n")
-}
-# for(i in 1:nrow(Outcomes)) {
-#   GAs <- paste0(GAs, knit_expand(text = "###  ", HTML("<strong>", Outcomes$BHealSc_Outcome[i], "</strong><br><em>", Outcomes$Otago_Attribute[i], "</em><br><par><ol type='i'>", Outcomes$Detail[i], "</ol></par><br>  ")))
-# }
+datatable(GAs,
+          class = 'compact hover stripe',
+          rownames = FALSE,
+          colnames = c("", "BHealSc\n Outcome", "Otago\n Graduate Attribute", "Details"),
+          escape = c(1:3),
+          options = list(dom = 't',
+                         pageLength = nrow(GAs))) %>%
+  formatStyle(1, fontWeight = "bold")
 
 ```
 
@@ -324,6 +322,20 @@ Column {data-width=450} {.tabset}
 ### Community Health Care
 
 ```{r CMHC}
+mat <- matrix(ncol = 18, nrow = nrow(filter(CMHC_nodes, type == TRUE)))
+mat <- as.data.frame(mat) %>%
+  as_tibble() %>%
+  mutate(across(everything(), as.character))
+
+names(mat) <- c("Paper", letters[1:17])
+
+
+  mutate(Paper = select(filter(CMHC_nodes, type == TRUE), label))
+
+(
+  ~c(LETTERS[1:20])
+)
+
 Links <- CMHC_edges %>%
   mutate(from = from - 1,
          to = to - 1)
@@ -430,7 +442,7 @@ onRender(sn_PUBH,
          }')
 ```
 
-Column {data-width=450}
+Column {data-width=350}
 -----------------------------------------------------------------------
 
 ### **Graduate Profile**  
