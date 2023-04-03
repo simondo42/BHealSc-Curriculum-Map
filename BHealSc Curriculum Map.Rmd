@@ -350,263 +350,147 @@ datatable(GAs,
 
 
 
-# By Major{data-navmenu="Graduate Attributes"}  
+# Community Health Care {data-navmenu="Graduate Attributes"}  
 
-Column {data-width=500} {.tabset}
------------------------------------------------------------------------
+## Column   
 
-### Community Health Care
+### **Graduate Attributes by Paper** {.data-width=500}  
 
 ```{r CMHC}
 make_major_GAs_table(Nodes = CMHC_nodes, Major = CMHC)
 
-# mat <- matrix(ncol = 17, nrow = nrow(filter(CMHC_nodes, type == TRUE)))
-# mat <- as.data.frame(mat) %>%
-#   as_tibble() %>%
-#   mutate(across(everything(), as.character)) %>%
-#   bind_cols(select(filter(CMHC_nodes, type == TRUE), Node))
-# 
-# names(mat) <- c(letters[1:17], "Paper")
-# 
-# CMHC <- CMHC %>%
-#   mutate(Letter = str_sub(BHealSc_Outcome, 1, 1))
-# 
-# for (i in 1:nrow(CMHC)) {
-#   mat[mat$Paper == CMHC$Paper[i], str_which(letters, CMHC$Letter[i])] <- " "
-# }
-# 
-# mat <- relocate(mat, Paper, .before = a)
-# 
-# datatable(mat,
-#           extensions = "Buttons",
-#           class = 'hover stripe',
-#           rownames = FALSE,
-#           escape = FALSE,
-#           options = list(dom = 't',
-#                          ordering = FALSE,
-#                          buttons = c('pdf', 'print'),
-#                          pageLength = nrow(mat))) %>%
-#   formatStyle(colnames(mat)[2:18],
-#               backgroundColor = styleEqual(" ", "#91c293"),
-#               border = '1px solid #FFFFFF')
-#           
-# Links <- CMHC_edges %>%
-#   mutate(from = from - 1,
-#          to = to - 1)
-# 
-# Nodes <- CMHC_nodes %>%
-#   mutate(id = id - 1)
-# 
-# sn <- sankeyNetwork(Links = Links,
-#               Nodes = Nodes,
-#               Source = "from",
-#               Target = "to",
-#               Value = "weight",
-#               NodeID = "label",
-#               iterations = 0,
-#               fontFamily = "Open Sans",
-#               fontSize = 14)
-# 
-# onRender(sn,
-#          'function(el, x){
-#          d3.selectAll(".node text")
-#             .style("font-weight","bold");
-#          }')
-
 ```
 
-### Māori Health  
+### **Specific Graduate Attributes**     
+
+# Māori Health {data-navmenu="Graduate Attributes"}   
 
 ```{r MAOH}
 make_major_GAs_table(Nodes = MAOH_nodes, Major = MAOH)
 
-# Links <- MAOH_edges %>%
-#   mutate(from = from - 1,
-#          to = to - 1)
-# 
-# Nodes <- MAOH_nodes %>%
-#   mutate(id = id - 1)
-# 
-# sn_MAOH <- sankeyNetwork(Links = Links,
-#               Nodes = Nodes,
-#               Source = "from",
-#               Target = "to",
-#               Value = "weight",
-#               NodeID = "label",
-#               iterations = 0,
-#               fontFamily = "Open Sans",
-#               fontSize = 14)
-# 
-# onRender(sn_MAOH,
-#          'function(el, x){
-#          d3.selectAll(".node text")
-#             .style("font-weight","bold");
-#          }')
 ```
 
-### **Pacific and Global Health**  
+# Pacific and Global Health {data-navmenu="Graduate Attributes"}   
 
 ```{r PACH}
 make_major_GAs_table(Nodes = PACH_nodes, Major = PACH)
-# Links <- PACH_edges %>%
-#   mutate(from = from - 1,
-#          to = to - 1)
-# 
-# Nodes <- PACH_nodes %>%
-#   mutate(id = id - 1)
-# 
-# sn_PACH <- sankeyNetwork(Links = Links,
-#               Nodes = Nodes,
-#               Source = "from",
-#               Target = "to",
-#               Value = "weight",
-#               NodeID = "label",
-#               iterations = 0,
-#               fontFamily = "Open Sans",
-#               fontSize = 14)
-# 
-# onRender(sn_PACH,
-#          'function(el, x){
-#          d3.selectAll(".node text")
-#             .style("font-weight","bold");
-#          }')
+
 ```
 
-### **Public Health**  
+### Public Health {data-navmenu="Graduate Attributes"}    
 
 ```{r PUBH}
 make_major_GAs_table(Nodes = PUBH_nodes, Major = PUBH)
-# Links <- PUBH_edges %>%
-#   mutate(from = from - 1,
-#          to = to - 1)
-# 
-# Nodes <- PUBH_nodes %>%
-#   mutate(id = id - 1)
-# 
-# sn_PUBH <- sankeyNetwork(Links = Links,
-#               Nodes = Nodes,
-#               Source = "from",
-#               Target = "to",
-#               Value = "weight",
-#               NodeID = "label",
-#               iterations = 0,
-#               fontFamily = "Open Sans",
-#               fontSize = 14)
-# 
-# onRender(sn_PUBH,
-#          'function(el, x){
-#          d3.selectAll(".node text")
-#             .style("font-weight","bold");
-#          }')
+
 ```
 
-Column {data-width=300}
------------------------------------------------------------------------
+<!-- Column {data-width=300} -->
+<!-- ----------------------------------------------------------------------- -->
 
-### **Graduate Profile**  
+<!-- ### **Graduate Profile**   -->
 
-```{r Outcomes}
+<!-- ```{r Outcomes} -->
 
-make_tippy(letter = Map_Outcomes$Letter[1],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[1],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[1],
-             Detail = Map_Outcomes$Detail[1])
+<!-- make_tippy(letter = Map_Outcomes$Letter[1], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[1], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[1], -->
+<!--              Detail = Map_Outcomes$Detail[1]) -->
 
-make_tippy(letter = Map_Outcomes$Letter[2],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[2],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[2],
-             Detail = Map_Outcomes$Detail[2])
-
-
-make_tippy(letter = Map_Outcomes$Letter[3],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[3],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[3],
-             Detail = Map_Outcomes$Detail[3])
+<!-- make_tippy(letter = Map_Outcomes$Letter[2], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[2], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[2], -->
+<!--              Detail = Map_Outcomes$Detail[2]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[4],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[4],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[4],
-             Detail = Map_Outcomes$Detail[4])
+<!-- make_tippy(letter = Map_Outcomes$Letter[3], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[3], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[3], -->
+<!--              Detail = Map_Outcomes$Detail[3]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[5],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[5],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[5],
-             Detail = Map_Outcomes$Detail[5])
+<!-- make_tippy(letter = Map_Outcomes$Letter[4], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[4], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[4], -->
+<!--              Detail = Map_Outcomes$Detail[4]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[6],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[6],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[6],
-             Detail = Map_Outcomes$Detail[6])
+<!-- make_tippy(letter = Map_Outcomes$Letter[5], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[5], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[5], -->
+<!--              Detail = Map_Outcomes$Detail[5]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[7],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[7],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[7],
-             Detail = Map_Outcomes$Detail[7])
+<!-- make_tippy(letter = Map_Outcomes$Letter[6], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[6], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[6], -->
+<!--              Detail = Map_Outcomes$Detail[6]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[8],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[8],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[8],
-             Detail = Map_Outcomes$Detail[8])
+<!-- make_tippy(letter = Map_Outcomes$Letter[7], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[7], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[7], -->
+<!--              Detail = Map_Outcomes$Detail[7]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[9],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[9],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[9],
-             Detail = Map_Outcomes$Detail[9])
+<!-- make_tippy(letter = Map_Outcomes$Letter[8], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[8], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[8], -->
+<!--              Detail = Map_Outcomes$Detail[8]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[10],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[10],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[10],
-             Detail = Map_Outcomes$Detail[10])
+<!-- make_tippy(letter = Map_Outcomes$Letter[9], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[9], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[9], -->
+<!--              Detail = Map_Outcomes$Detail[9]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[11],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[11],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[11],
-             Detail = Map_Outcomes$Detail[11])
+<!-- make_tippy(letter = Map_Outcomes$Letter[10], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[10], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[10], -->
+<!--              Detail = Map_Outcomes$Detail[10]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[12],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[12],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[12],
-             Detail = Map_Outcomes$Detail[12])
+<!-- make_tippy(letter = Map_Outcomes$Letter[11], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[11], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[11], -->
+<!--              Detail = Map_Outcomes$Detail[11]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[13],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[13],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[13],
-             Detail = Map_Outcomes$Detail[13])
+<!-- make_tippy(letter = Map_Outcomes$Letter[12], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[12], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[12], -->
+<!--              Detail = Map_Outcomes$Detail[12]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[14],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[14],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[14],
-             Detail = Map_Outcomes$Detail[14])
+<!-- make_tippy(letter = Map_Outcomes$Letter[13], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[13], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[13], -->
+<!--              Detail = Map_Outcomes$Detail[13]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[15],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[15],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[15],
-             Detail = Map_Outcomes$Detail[15])
+<!-- make_tippy(letter = Map_Outcomes$Letter[14], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[14], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[14], -->
+<!--              Detail = Map_Outcomes$Detail[14]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[16],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[16],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[16],
-             Detail = Map_Outcomes$Detail[16])
+<!-- make_tippy(letter = Map_Outcomes$Letter[15], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[15], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[15], -->
+<!--              Detail = Map_Outcomes$Detail[15]) -->
 
 
-make_tippy(letter = Map_Outcomes$Letter[17],
-             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[17],
-             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[17],
-             Detail = Map_Outcomes$Detail[17])
-```
+<!-- make_tippy(letter = Map_Outcomes$Letter[16], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[16], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[16], -->
+<!--              Detail = Map_Outcomes$Detail[16]) -->
+
+
+<!-- make_tippy(letter = Map_Outcomes$Letter[17], -->
+<!--              BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[17], -->
+<!--              Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[17], -->
+<!--              Detail = Map_Outcomes$Detail[17]) -->
+<!-- ``` -->
 
 Paper Information {.storyboard}
 ==================
