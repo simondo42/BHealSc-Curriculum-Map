@@ -1,5 +1,5 @@
 ---
-title: "BHealSc Curriculum Map"
+title: "BHealSc Curriculum Map (2022)"
 #author: Simon Horsburgh
 output: 
   flexdashboard::flex_dashboard:
@@ -30,10 +30,11 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 library(htmlwidgets)
-library(networkD3)
+#library(networkD3)
 library(tippy)
 library(htmltools)
 library(DT)
+#library(flextable)
 # Install thematic and un-comment for themed static plots (i.e., ggplot2)
 # thematic::thematic_rmd()
 
@@ -141,6 +142,40 @@ make_paper_assess_info <- function(Papers, Paper = "CMHC 201") {
   return(text)
 
 }
+
+make_major_GAs_table <- function(Nodes, Major) {
+  
+  mat <- matrix(ncol = 17, nrow = nrow(filter(Nodes, type == TRUE)))
+  mat <- as.data.frame(mat) %>%
+    as_tibble() %>%
+    mutate(across(everything(), as.character)) %>%
+    bind_cols(select(filter(Nodes, type == TRUE), Node))
+  
+  names(mat) <- c(letters[1:17], "Paper")
+  
+  Major <- Major %>%
+    mutate(Letter = str_sub(BHealSc_Outcome, 1, 1))
+  
+  for (i in 1:nrow(Major)) {
+    mat[mat$Paper == Major$Paper[i], str_which(letters, Major$Letter[i])] <- " "
+  }
+  
+  mat <- relocate(mat, Paper, .before = a)
+  
+  datatable(mat,
+            extensions = "Buttons",
+            class = 'hover stripe',
+            rownames = FALSE,
+            escape = FALSE,
+            options = list(dom = 't',
+                           ordering = FALSE,
+                           buttons = c('pdf', 'print'),
+                           pageLength = nrow(mat))) %>%
+    formatStyle(colnames(mat)[2:18],
+                backgroundColor = styleEqual(" ", "#91c293"),
+                border = '1px solid #FFFFFF')
+}
+
 ```
 
 ```{r load}
@@ -307,6 +342,7 @@ datatable(GAs,
           colnames = c("", "BHealSc\n Outcome", "Otago\n Graduate Attribute", "Details"),
           escape = c(1:3),
           options = list(dom = 't',
+                         ordering = FALSE,
                          pageLength = nrow(GAs))) %>%
   formatStyle(1, fontWeight = "bold")
 
@@ -316,133 +352,155 @@ datatable(GAs,
 
 # By Major{data-navmenu="Graduate Attributes"}  
 
-Column {data-width=450} {.tabset}
+Column {data-width=500} {.tabset}
 -----------------------------------------------------------------------
 
 ### Community Health Care
 
 ```{r CMHC}
-mat <- matrix(ncol = 18, nrow = nrow(filter(CMHC_nodes, type == TRUE)))
-mat <- as.data.frame(mat) %>%
-  as_tibble() %>%
-  mutate(across(everything(), as.character))
+make_major_GAs_table(Nodes = CMHC_nodes, Major = CMHC)
 
-names(mat) <- c("Paper", letters[1:17])
-
-
-  mutate(Paper = select(filter(CMHC_nodes, type == TRUE), label))
-
-(
-  ~c(LETTERS[1:20])
-)
-
-Links <- CMHC_edges %>%
-  mutate(from = from - 1,
-         to = to - 1)
-
-Nodes <- CMHC_nodes %>%
-  mutate(id = id - 1)
-
-sn <- sankeyNetwork(Links = Links,
-              Nodes = Nodes,
-              Source = "from",
-              Target = "to",
-              Value = "weight",
-              NodeID = "label",
-              iterations = 0,
-              fontFamily = "Open Sans",
-              fontSize = 14)
-
-onRender(sn,
-         'function(el, x){
-         d3.selectAll(".node text")
-            .style("font-weight","bold");
-         }')
+# mat <- matrix(ncol = 17, nrow = nrow(filter(CMHC_nodes, type == TRUE)))
+# mat <- as.data.frame(mat) %>%
+#   as_tibble() %>%
+#   mutate(across(everything(), as.character)) %>%
+#   bind_cols(select(filter(CMHC_nodes, type == TRUE), Node))
+# 
+# names(mat) <- c(letters[1:17], "Paper")
+# 
+# CMHC <- CMHC %>%
+#   mutate(Letter = str_sub(BHealSc_Outcome, 1, 1))
+# 
+# for (i in 1:nrow(CMHC)) {
+#   mat[mat$Paper == CMHC$Paper[i], str_which(letters, CMHC$Letter[i])] <- " "
+# }
+# 
+# mat <- relocate(mat, Paper, .before = a)
+# 
+# datatable(mat,
+#           extensions = "Buttons",
+#           class = 'hover stripe',
+#           rownames = FALSE,
+#           escape = FALSE,
+#           options = list(dom = 't',
+#                          ordering = FALSE,
+#                          buttons = c('pdf', 'print'),
+#                          pageLength = nrow(mat))) %>%
+#   formatStyle(colnames(mat)[2:18],
+#               backgroundColor = styleEqual(" ", "#91c293"),
+#               border = '1px solid #FFFFFF')
+#           
+# Links <- CMHC_edges %>%
+#   mutate(from = from - 1,
+#          to = to - 1)
+# 
+# Nodes <- CMHC_nodes %>%
+#   mutate(id = id - 1)
+# 
+# sn <- sankeyNetwork(Links = Links,
+#               Nodes = Nodes,
+#               Source = "from",
+#               Target = "to",
+#               Value = "weight",
+#               NodeID = "label",
+#               iterations = 0,
+#               fontFamily = "Open Sans",
+#               fontSize = 14)
+# 
+# onRender(sn,
+#          'function(el, x){
+#          d3.selectAll(".node text")
+#             .style("font-weight","bold");
+#          }')
 
 ```
 
-### **Māori Health**  
+### Māori Health  
 
 ```{r MAOH}
-Links <- MAOH_edges %>%
-  mutate(from = from - 1,
-         to = to - 1)
+make_major_GAs_table(Nodes = MAOH_nodes, Major = MAOH)
 
-Nodes <- MAOH_nodes %>%
-  mutate(id = id - 1)
-
-sn_MAOH <- sankeyNetwork(Links = Links,
-              Nodes = Nodes,
-              Source = "from",
-              Target = "to",
-              Value = "weight",
-              NodeID = "label",
-              iterations = 0,
-              fontFamily = "Open Sans",
-              fontSize = 14)
-
-onRender(sn_MAOH,
-         'function(el, x){
-         d3.selectAll(".node text")
-            .style("font-weight","bold");
-         }')
+# Links <- MAOH_edges %>%
+#   mutate(from = from - 1,
+#          to = to - 1)
+# 
+# Nodes <- MAOH_nodes %>%
+#   mutate(id = id - 1)
+# 
+# sn_MAOH <- sankeyNetwork(Links = Links,
+#               Nodes = Nodes,
+#               Source = "from",
+#               Target = "to",
+#               Value = "weight",
+#               NodeID = "label",
+#               iterations = 0,
+#               fontFamily = "Open Sans",
+#               fontSize = 14)
+# 
+# onRender(sn_MAOH,
+#          'function(el, x){
+#          d3.selectAll(".node text")
+#             .style("font-weight","bold");
+#          }')
 ```
 
 ### **Pacific and Global Health**  
 
 ```{r PACH}
-Links <- PACH_edges %>%
-  mutate(from = from - 1,
-         to = to - 1)
-
-Nodes <- PACH_nodes %>%
-  mutate(id = id - 1)
-
-sn_PACH <- sankeyNetwork(Links = Links,
-              Nodes = Nodes,
-              Source = "from",
-              Target = "to",
-              Value = "weight",
-              NodeID = "label",
-              iterations = 0,
-              fontFamily = "Open Sans",
-              fontSize = 14)
-
-onRender(sn_PACH,
-         'function(el, x){
-         d3.selectAll(".node text")
-            .style("font-weight","bold");
-         }')
+make_major_GAs_table(Nodes = PACH_nodes, Major = PACH)
+# Links <- PACH_edges %>%
+#   mutate(from = from - 1,
+#          to = to - 1)
+# 
+# Nodes <- PACH_nodes %>%
+#   mutate(id = id - 1)
+# 
+# sn_PACH <- sankeyNetwork(Links = Links,
+#               Nodes = Nodes,
+#               Source = "from",
+#               Target = "to",
+#               Value = "weight",
+#               NodeID = "label",
+#               iterations = 0,
+#               fontFamily = "Open Sans",
+#               fontSize = 14)
+# 
+# onRender(sn_PACH,
+#          'function(el, x){
+#          d3.selectAll(".node text")
+#             .style("font-weight","bold");
+#          }')
 ```
 
 ### **Public Health**  
 
 ```{r PUBH}
-Links <- PUBH_edges %>%
-  mutate(from = from - 1,
-         to = to - 1)
-
-Nodes <- PUBH_nodes %>%
-  mutate(id = id - 1)
-
-sn_PUBH <- sankeyNetwork(Links = Links,
-              Nodes = Nodes,
-              Source = "from",
-              Target = "to",
-              Value = "weight",
-              NodeID = "label",
-              iterations = 0,
-              fontFamily = "Open Sans",
-              fontSize = 14)
-
-onRender(sn_PUBH,
-         'function(el, x){
-         d3.selectAll(".node text")
-            .style("font-weight","bold");
-         }')
+make_major_GAs_table(Nodes = PUBH_nodes, Major = PUBH)
+# Links <- PUBH_edges %>%
+#   mutate(from = from - 1,
+#          to = to - 1)
+# 
+# Nodes <- PUBH_nodes %>%
+#   mutate(id = id - 1)
+# 
+# sn_PUBH <- sankeyNetwork(Links = Links,
+#               Nodes = Nodes,
+#               Source = "from",
+#               Target = "to",
+#               Value = "weight",
+#               NodeID = "label",
+#               iterations = 0,
+#               fontFamily = "Open Sans",
+#               fontSize = 14)
+# 
+# onRender(sn_PUBH,
+#          'function(el, x){
+#          d3.selectAll(".node text")
+#             .style("font-weight","bold");
+#          }')
 ```
 
-Column {data-width=350}
+Column {data-width=300}
 -----------------------------------------------------------------------
 
 ### **Graduate Profile**  
