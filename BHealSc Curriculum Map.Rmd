@@ -10,16 +10,23 @@ output:
       #     google: "Open Sans"
 #      navbar-bg: #003D79
       version: 4
-      # base_font:
-      #   google: Prompt
-      # code_font:
-        # google: JetBrains Mono
     orientation: columns
     vertical_layout: fill
 editor_options: 
   chunk_output_type: console
 ---
- 
+
+```{css, echo=FALSE}
+.datatables.html-widget.html-widget-static-bound { 
+  height: auto !important;
+#  width: 90vw !important;
+}
+.dataTables_scrollBody {
+  height: unset !important;
+}
+
+```
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
@@ -61,54 +68,86 @@ make_tippy <- function(letter = "a",
   )
 }
 
-make_paper_info <- function(Papers, Paper = "CMHC 201") {
+make_paper_outcomes <- function(Papers, Paper = "CMHC 201", Outcome_list = Outcome_list) {
 
   Objs <- Papers %>%
       filter(PaperCode == Paper) %>%
-      separate(col = Objectives,
-             into = c("O1", "O2", "O3", "O4", "O5", "O6", "O7", "O8", "O9", "O10", "O11", "O12", "O13", "O14", "O15"),
-             sep = ";",
-             remove = FALSE) %>%
-    replace_na(list(O1 = " ",
-                    O2 = " ",
-                    O3 = " ",
-                    O4 = " ",
-                    O5 = " ",
-                    O6 = " ",
-                    O7 = " ",
-                    O8 = " ",
-                    O9 = " ",
-                    O10 = " ",
-                    O11 = " ",
-                    O12 = " ",
-                    O13 = " ",
-                    O14 = " ",
-                    O15 = " "
-                    ))
+      separate_wider_delim(cols = Objectives,
+             names = c("Obj_1", "Obj_2", "Obj_3", "Obj_4", "Obj_5", "Obj_6", "Obj_7", "Obj_8", "Obj_9", "Obj_10", "Obj_11", "Obj_12", "Obj_13", "Obj_14", "Obj_15"),
+             delim = ";",
+             too_few = "align_start",
+             cols_remove = FALSE) %>%
+    replace_na(list(Obj_1 = " ",
+                    Obj_2 = " ",
+                    Obj_3 = " ",
+                    Obj_4 = " ",
+                    Obj_5 = " ",
+                    Obj_6 = " ",
+                    Obj_7 = " ",
+                    Obj_8 = " ",
+                    Obj_9 = " ",
+                    Obj_10 = " ",
+                    Obj_11 = " ",
+                    Obj_12 = " ",
+                    Obj_13 = " ",
+                    Obj_14 = " ",
+                    Obj_15 = " "
+                    )) %>%
+    pivot_longer(cols = starts_with("Obj_"),
+                 values_to = "Learning_Objective") %>%
+    filter(Learning_Objective != " ")
 
-  text <- paste0("<p><strong>Learning Objectives</strong></p><ol type='1'>")
-  for (i in 0:14) {
-    text <- paste0(text, ifelse(Objs[1, (match("O1", names(Objs)) + i)] == " ",
-                                "",
-                                paste0("<li>", Objs[1, (match("O1", names(Objs)) + i)], "</li>"))
-    )
-  }
-  text <- paste0(text, "</ol><br>")
+  BOs <- select(Objs, Learning_Objective, starts_with("LO_Outcomes_"))
+  BOs <- BOs %>%
+    mutate(LO_Num = 1:nrow(BOs)) %>%
+    pivot_longer(cols = starts_with("LO_Outcomes_"),
+                 values_to = "Letter") %>%
+    mutate(name = str_remove(name, "LO_Outcomes_")) %>%
+    filter(as.character(LO_Num) == name) %>%
+    separate_longer_delim(cols = Letter,
+                          delim = ";") %>%
+    left_join(Outcome_list, by = "Letter") %>%
+    mutate(BHealSc_Outcome = paste0("<b>", Letter, "</b> ", BHealSc_Outcome, "<br />"),
+           Learning_Objective = paste0(name, ". ", Learning_Objective)) %>%
+    pivot_wider(names_from = "Letter",
+                values_from = "BHealSc_Outcome")
+  
+  tb <- BOs %>%
+    select(Learning_Objective, !c(name, LO_Num))
+  
+  tb <- tb %>%
+    select(order(colnames(tb))) %>%
+    relocate(Learning_Objective) %>%
+    unite(col = BHealSc_Outcome,
+          any_of(c(2:ncol(tb))),
+          sep = "",
+          na.rm = TRUE)
 
-  return(text)
+  datatable(tb,
+           class = 'compact hover stripe',
+           rownames = FALSE,
+           colnames = c("Learning Objectives", "BHealSc Outcomes"),
+           escape = 1,
+           options = list(dom = 't',
+                          autoWidth = TRUE,
+                          ordering = FALSE,
+                          pageLength = nrow(tb)))
+  
 }
 
 make_paper_assess_info <- function(Papers, Paper = "CMHC 201") {
   Assess <- Papers %>%
     filter(PaperCode == Paper) %>%
-    separate(col = IA_Description,
-              into = c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10"),
-              sep = ";",
-              remove = FALSE) %>%
-    separate(col = IA_Weight,
-              into = c("W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9", "W10"),
-              sep = ";",
-              remove = FALSE) %>%
+    separate_wider_delim(cols = IA_Description,
+              names = c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10"),
+              delim = ";",
+             too_few = "align_start",
+             cols_remove = FALSE) %>%
+    separate_wider_delim(cols = IA_Weight,
+              names = c("W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9", "W10"),
+              delim = ";",
+             too_few = "align_start",
+             cols_remove = FALSE) %>%
     replace_na(list(A1 = " ",
                     A2 = " ",
                     A3 = " ",
@@ -128,10 +167,15 @@ make_paper_assess_info <- function(Papers, Paper = "CMHC 201") {
                     W7 = " ",
                     W8 = " ",
                     W9 = " ",
-                    W10 = " "))
-    text <- paste0("<p><strong>Paper Assessments</strong></p><table id='table_", Paper, "'><tr><th>Assessment</th><th>Weight</th></tr>")
+                    W10 = " ",
+                    IA_Details_1 = " ",
+                    IA_Details_2 = " ",
+                    IA_Details_3 = " ",
+                    IA_Details_4 = " ",
+                    IA_Details_5 = " "))
+    text <- paste0("<p><strong>Paper Assessments</strong></p><table id='table_", Paper, "'><tr><th>Assessment</th><th>Details</th><th>Weight</th></tr>")
 
-  for(i in 0:9) {
+  for (i in 0:9) {
     text <- paste0(text, ifelse(Assess[1, (match("A1", names(Assess)) + i)] == " ",
                                 "",
                                 paste0("<tr><td>", Assess[1, (match("A1", names(Assess)) + i)], "</td><td>", Assess[1, (match("W1", names(Assess)) + i)], "</td></tr>"))
@@ -163,13 +207,11 @@ make_major_GAs_table <- function(Nodes, Major) {
   mat <- relocate(mat, Paper, .before = a)
   
   datatable(mat,
-            extensions = "Buttons",
-            class = 'hover stripe',
+            class = 'compact hover stripe',
             rownames = FALSE,
             escape = FALSE,
             options = list(dom = 't',
                            ordering = FALSE,
-                           buttons = c('pdf', 'print'),
                            pageLength = nrow(mat))) %>%
     formatStyle(colnames(mat)[2:18],
                 backgroundColor = styleEqual(" ", "#91c293"),
@@ -314,7 +356,12 @@ PUBH_edges <- PUBH %>%
 
 Papers <- read_xlsx(path = "./2022 Major - Papers - Outcome Map.xlsx",
                           sheet = "Papers") %>% 
-  filter(Year == Reporting_Year)
+  filter(Year == Reporting_Year) %>%
+  mutate(across(starts_with("IA_Details_"), .fns = as.character))
+
+Outcome_list <- Outcomes %>%
+  mutate(BHealSc = str_sub(BHealSc_Outcome, start = 3)) %>%
+  select(Letter, BHealSc_Outcome = BHealSc)
 ```
 
 # List of Degree Attributes {data-navmenu="Graduate Attributes"}  
@@ -342,6 +389,7 @@ datatable(GAs,
           colnames = c("", "BHealSc\n Outcome", "Otago\n Graduate Attribute", "Details"),
           escape = c(1:3),
           options = list(dom = 't',
+                         autoWidth = TRUE,
                          ordering = FALSE,
                          pageLength = nrow(GAs))) %>%
   formatStyle(1, fontWeight = "bold")
@@ -350,39 +398,155 @@ datatable(GAs,
 
 
 
-# Community Health Care {data-navmenu="Graduate Attributes"}  
+# Map By Major {data-navmenu="Graduate Attributes"}  
 
-## Column   
+## Column {data-width=600 .tabset}       
 
-### **Graduate Attributes by Paper** {.data-width=500}  
+### Community Health Care  
 
+> **Graduate Attributes by Paper** <br /> *All listed papers must be passed as part of the major*    
+  
 ```{r CMHC}
 make_major_GAs_table(Nodes = CMHC_nodes, Major = CMHC)
 
-```
+```  
 
-### **Specific Graduate Attributes**     
+### Māori Health     
 
-# Māori Health {data-navmenu="Graduate Attributes"}   
-
+> **Graduate Attributes by Paper** <br /> *All listed papers must be passed as part of the major*    
+  
 ```{r MAOH}
 make_major_GAs_table(Nodes = MAOH_nodes, Major = MAOH)
 
 ```
 
-# Pacific and Global Health {data-navmenu="Graduate Attributes"}   
+### Pacific and Global Health     
 
+> **Graduate Attributes by Paper** <br /> *All listed papers must be passed as part of the major*    
+  
 ```{r PACH}
 make_major_GAs_table(Nodes = PACH_nodes, Major = PACH)
 
 ```
 
-### Public Health {data-navmenu="Graduate Attributes"}    
+### Public Health      
 
+> **Graduate Attributes by Paper** <br /> *All listed papers must be passed as part of the major, although only one of PUBH 304 or PUBH 311 is required*    
+  
 ```{r PUBH}
 make_major_GAs_table(Nodes = PUBH_nodes, Major = PUBH)
 
 ```
+
+## Column {data-width=400 .tabset}  
+
+### **Graduate Profile**     
+
+> *Otago Graduate Attributes in Italics*  
+
+```{r Outcomes}
+
+make_tippy(letter = Map_Outcomes$Letter[1],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[1],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[1],
+             Detail = Map_Outcomes$Detail[1])
+
+make_tippy(letter = Map_Outcomes$Letter[2],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[2],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[2],
+             Detail = Map_Outcomes$Detail[2])
+
+
+make_tippy(letter = Map_Outcomes$Letter[3],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[3],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[3],
+             Detail = Map_Outcomes$Detail[3])
+
+
+make_tippy(letter = Map_Outcomes$Letter[4],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[4],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[4],
+             Detail = Map_Outcomes$Detail[4])
+
+
+make_tippy(letter = Map_Outcomes$Letter[5],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[5],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[5],
+             Detail = Map_Outcomes$Detail[5])
+
+
+make_tippy(letter = Map_Outcomes$Letter[6],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[6],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[6],
+             Detail = Map_Outcomes$Detail[6])
+
+
+make_tippy(letter = Map_Outcomes$Letter[7],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[7],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[7],
+             Detail = Map_Outcomes$Detail[7])
+
+
+make_tippy(letter = Map_Outcomes$Letter[8],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[8],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[8],
+             Detail = Map_Outcomes$Detail[8])
+
+
+make_tippy(letter = Map_Outcomes$Letter[9],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[9],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[9],
+             Detail = Map_Outcomes$Detail[9])
+
+
+make_tippy(letter = Map_Outcomes$Letter[10],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[10],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[10],
+             Detail = Map_Outcomes$Detail[10])
+
+
+make_tippy(letter = Map_Outcomes$Letter[11],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[11],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[11],
+             Detail = Map_Outcomes$Detail[11])
+
+
+make_tippy(letter = Map_Outcomes$Letter[12],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[12],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[12],
+             Detail = Map_Outcomes$Detail[12])
+
+
+make_tippy(letter = Map_Outcomes$Letter[13],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[13],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[13],
+             Detail = Map_Outcomes$Detail[13])
+
+
+make_tippy(letter = Map_Outcomes$Letter[14],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[14],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[14],
+             Detail = Map_Outcomes$Detail[14])
+
+
+make_tippy(letter = Map_Outcomes$Letter[15],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[15],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[15],
+             Detail = Map_Outcomes$Detail[15])
+
+
+make_tippy(letter = Map_Outcomes$Letter[16],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[16],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[16],
+             Detail = Map_Outcomes$Detail[16])
+
+
+make_tippy(letter = Map_Outcomes$Letter[17],
+             BHealSc_Outcome = Map_Outcomes$BHealSc_Outcome[17],
+             Otago_Outcome = Map_Outcomes$Otago_Graduate_Profile[17],
+             Detail = Map_Outcomes$Detail[17])
+```
+
 
 <!-- Column {data-width=300} -->
 <!-- ----------------------------------------------------------------------- -->
@@ -492,188 +656,229 @@ make_major_GAs_table(Nodes = PUBH_nodes, Major = PUBH)
 <!--              Detail = Map_Outcomes$Detail[17]) -->
 <!-- ``` -->
 
-Paper Information {.storyboard}
-==================
+# **`r Papers$PaperCode[1]`** _(`r Papers$PaperTitle[1]`)_ {data-navmenu="Paper Information"}
 
-### **`r Papers$PaperCode[1]`** <br> _(`r Papers$PaperTitle[1]`)_ <br> **Semester:** `r Papers$Semester[1]` <br> **Convenor:** `r Papers$Convenor[1]` <br> **Email:** `r Papers$Email[1]` <br> **Pre-Reqs:** `r Papers$PreReqs[1]` <br> **Restrictions:** `r Papers$Restrictions[1]`  
+## Column {.tabset}  
+
+### Paper Summary  
+
+**`r Papers$PaperCode[1]`** <br> _(`r Papers$PaperTitle[1]`)_ <br> **Semester:** `r Papers$Semester[1]` <br> **Convenor:** `r Papers$Convenor[1]` <br> **Email:** `r Papers$Email[1]` <br> **Pre-Reqs:** `r Papers$PreReqs[1]` <br> **Restrictions:** `r Papers$Restrictions[1]`  
 
 ```{r CMHC201_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "CMHC 201")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 201")
+text <- make_paper_outcomes(Papers = Papers, Paper = "CMHC 201", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 201")
 ```
+
+### Learning Outcomes  
 
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
+# **`r Papers$PaperCode[2]`** _(`r Papers$PaperTitle[2]`)_ {data-navmenu="Paper Information"}
 
-### **`r Papers$PaperCode[2]`** <br> _(`r Papers$PaperTitle[2]`)_ <br> **Semester:** `r Papers$Semester[2]` <br> **Convenor:** `r Papers$Convenor[2]` <br> **Email:** `r Papers$Email[2]` <br> **Pre-Reqs:** `r Papers$PreReqs[2]` <br> **Restrictions:** `r Papers$Restrictions[2]`  
+**`r Papers$PaperCode[2]`** <br> _(`r Papers$PaperTitle[2]`)_ <br> **Semester:** `r Papers$Semester[2]` <br> **Convenor:** `r Papers$Convenor[2]` <br> **Email:** `r Papers$Email[2]` <br> **Pre-Reqs:** `r Papers$PreReqs[2]` <br> **Restrictions:** `r Papers$Restrictions[2]`  
 
 ```{r CMHC211_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "CMHC 211")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 211")
+text <- make_paper_outcomes(Papers = Papers, Paper = "CMHC 211", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 211")
 ```
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
-### **`r Papers$PaperCode[3]`** <br> _(`r Papers$PaperTitle[3]`)_ <br> **Semester:** `r Papers$Semester[3]` <br> **Convenor:** `r Papers$Convenor[3]` <br> **Email:** `r Papers$Email[3]` <br> **Pre-Reqs:** `r Papers$PreReqs[3]` <br> **Restrictions:** `r Papers$Restrictions[3]`  
+# **`r Papers$PaperCode[3]`** _(`r Papers$PaperTitle[3]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[3]`** <br> _(`r Papers$PaperTitle[3]`)_ <br> **Semester:** `r Papers$Semester[3]` <br> **Convenor:** `r Papers$Convenor[3]` <br> **Email:** `r Papers$Email[3]` <br> **Pre-Reqs:** `r Papers$PreReqs[3]` <br> **Restrictions:** `r Papers$Restrictions[3]`  
 
 ```{r CMHC301_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "CMHC 301")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 301")
+text <- make_paper_outcomes(Papers = Papers, Paper = "CMHC 301", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 301")
 ```
 
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
+# **`r Papers$PaperCode[4]`** _(`r Papers$PaperTitle[4]`)_ {data-navmenu="Paper Information"}
 
-### **`r Papers$PaperCode[4]`** <br> _(`r Papers$PaperTitle[4]`)_ <br> **Semester:** `r Papers$Semester[4]` <br> **Convenor:** `r Papers$Convenor[4]` <br> **Email:** `r Papers$Email[4]` <br> **Pre-Reqs:** `r Papers$PreReqs[4]` <br> **Restrictions:** `r Papers$Restrictions[4]`  
+**`r Papers$PaperCode[4]`** <br> _(`r Papers$PaperTitle[4]`)_ <br> **Semester:** `r Papers$Semester[4]` <br> **Convenor:** `r Papers$Convenor[4]` <br> **Email:** `r Papers$Email[4]` <br> **Pre-Reqs:** `r Papers$PreReqs[4]` <br> **Restrictions:** `r Papers$Restrictions[4]`  
 
 
 ```{r CMHC311_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "CMHC 311")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 311")
+text <- make_paper_outcomes(Papers = Papers, Paper = "CMHC 311", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 311")
 ```
 
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
-### **`r Papers$PaperCode[5]`** <br> _(`r Papers$PaperTitle[5]`)_ <br> **Semester:** `r Papers$Semester[5]` <br> **Convenor:** `r Papers$Convenor[5]` <br> **Email:** `r Papers$Email[5]` <br> **Pre-Reqs:** `r Papers$PreReqs[5]` <br> **Restrictions:** `r Papers$Restrictions[5]`  
+# **`r Papers$PaperCode[5]`** _(`r Papers$PaperTitle[5]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[5]`** <br> _(`r Papers$PaperTitle[5]`)_ <br> **Semester:** `r Papers$Semester[5]` <br> **Convenor:** `r Papers$Convenor[5]` <br> **Email:** `r Papers$Email[5]` <br> **Pre-Reqs:** `r Papers$PreReqs[5]` <br> **Restrictions:** `r Papers$Restrictions[5]`  
 
 ```{r MAOH201_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "MAOH 201")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "MAOH 201")
+text <- make_paper_outcomes(Papers = Papers, Paper = "MAOH 201", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "MAOH 201")
 ```
 
+
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
-### **`r Papers$PaperCode[6]`** <br> _(`r Papers$PaperTitle[6]`)_ <br> **Semester:** `r Papers$Semester[6]` <br> **Convenor:** `r Papers$Convenor[6]` <br> **Email:** `r Papers$Email[6]` <br> **Pre-Reqs:** `r Papers$PreReqs[6]` <br> **Restrictions:** `r Papers$Restrictions[6]`  
+# **`r Papers$PaperCode[6]`** _(`r Papers$PaperTitle[6]`)_ {data-navmenu="Paper Information"}  
+
+**`r Papers$PaperCode[6]`** <br> _(`r Papers$PaperTitle[6]`)_ <br> **Semester:** `r Papers$Semester[6]` <br> **Convenor:** `r Papers$Convenor[6]` <br> **Email:** `r Papers$Email[6]` <br> **Pre-Reqs:** `r Papers$PreReqs[6]` <br> **Restrictions:** `r Papers$Restrictions[6]`  
 
 ```{r MAOH301_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "MAOH 301")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "MAOH 301")
+text <- make_paper_outcomes(Papers = Papers, Paper = "MAOH 301", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "MAOH 301")
 ```
 
+
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
-### **`r Papers$PaperCode[7]`** <br> _(`r Papers$PaperTitle[7]`)_ <br> **Semester:** `r Papers$Semester[7]` <br> **Convenor:** `r Papers$Convenor[7]` <br> **Email:** `r Papers$Email[7]` <br> **Pre-Reqs:** `r Papers$PreReqs[7]` <br> **Restrictions:** `r Papers$Restrictions[11]`  
+# **`r Papers$PaperCode[7]`** _(`r Papers$PaperTitle[7]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[7]`** <br> _(`r Papers$PaperTitle[7]`)_ <br> **Semester:** `r Papers$Semester[7]` <br> **Convenor:** `r Papers$Convenor[7]` <br> **Email:** `r Papers$Email[7]` <br> **Pre-Reqs:** `r Papers$PreReqs[7]` <br> **Restrictions:** `r Papers$Restrictions[11]`  
 
 ```{r PACH201_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "PACH 201")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "PACH 201")
+text <- make_paper_outcomes(Papers = Papers, Paper = "PACH 201", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "PACH 201")
 ```
 
+
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
-### **`r Papers$PaperCode[8]`** <br> _(`r Papers$PaperTitle[8]`)_ <br> **Semester:** `r Papers$Semester[8]` <br> **Convenor:** `r Papers$Convenor[8]` <br> **Email:** `r Papers$Email[8]` <br> **Pre-Reqs:** `r Papers$PreReqs[8]` <br> **Restrictions:** `r Papers$Restrictions[8]`  
+# **`r Papers$PaperCode[8]`** _(`r Papers$PaperTitle[8]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[8]`** <br> _(`r Papers$PaperTitle[8]`)_ <br> **Semester:** `r Papers$Semester[8]` <br> **Convenor:** `r Papers$Convenor[8]` <br> **Email:** `r Papers$Email[8]` <br> **Pre-Reqs:** `r Papers$PreReqs[8]` <br> **Restrictions:** `r Papers$Restrictions[8]`  
 
 ```{r PACH301_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "PACH 301")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "PACH 301")
+text <- make_paper_outcomes(Papers = Papers, Paper = "PACH 301", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "PACH 301")
 ```
 
+
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
-### **`r Papers$PaperCode[9]`** <br> _(`r Papers$PaperTitle[9]`)_ <br> **Semester:** `r Papers$Semester[9]` <br> **Convenor:** `r Papers$Convenor[9]` <br> **Email:** `r Papers$Email[9]` <br> **Pre-Reqs:** `r Papers$PreReqs[9]` <br> **Restrictions:** `r Papers$Restrictions[9]`  
+# **`r Papers$PaperCode[9]`** _(`r Papers$PaperTitle[9]`)_ {data-navmenu="Paper Information"}  
+
+**`r Papers$PaperCode[9]`** <br> _(`r Papers$PaperTitle[9]`)_ <br> **Semester:** `r Papers$Semester[9]` <br> **Convenor:** `r Papers$Convenor[9]` <br> **Email:** `r Papers$Email[9]` <br> **Pre-Reqs:** `r Papers$PreReqs[9]` <br> **Restrictions:** `r Papers$Restrictions[9]`  
 
 ```{r PUBH202_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "PUBH 202")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 202")
+text <- make_paper_outcomes(Papers = Papers, Paper = "PUBH 202", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 202")
 ```
 
+
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
-### **`r Papers$PaperCode[10]`** <br> _(`r Papers$PaperTitle[10]`)_ <br> **Semester:** `r Papers$Semester[10]` <br> **Convenor:** `r Papers$Convenor[10]` <br> **Email:** `r Papers$Email[10]` <br> **Pre-Reqs:** `r Papers$PreReqs[10]` <br> **Restrictions:** `r Papers$Restrictions[10]`  
+# **`r Papers$PaperCode[10]`** _(`r Papers$PaperTitle[10]`)_ {data-navmenu="Paper Information"}  
+
+**`r Papers$PaperCode[10]`** <br> _(`r Papers$PaperTitle[10]`)_ <br> **Semester:** `r Papers$Semester[10]` <br> **Convenor:** `r Papers$Convenor[10]` <br> **Email:** `r Papers$Email[10]` <br> **Pre-Reqs:** `r Papers$PreReqs[10]` <br> **Restrictions:** `r Papers$Restrictions[10]`  
 
 ```{r PUBH203_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "PUBH 203")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 203")
+text <- make_paper_outcomes(Papers = Papers, Paper = "PUBH 203", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 203")
 ```
 
+
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
-### **`r Papers$PaperCode[11]`** <br> _(`r Papers$PaperTitle[11]`)_ <br> **Semester:** `r Papers$Semester[11]` <br> **Convenor:** `r Papers$Convenor[11]` <br> **Email:** `r Papers$Email[11]` <br> **Pre-Reqs:** `r Papers$PreReqs[11]` <br> **Restrictions:** `r Papers$Restrictions[11]`  
+# **`r Papers$PaperCode[11]`** _(`r Papers$PaperTitle[11]`)_ {data-navmenu="Paper Information"}  
+
+**`r Papers$PaperCode[11]`** <br> _(`r Papers$PaperTitle[11]`)_ <br> **Semester:** `r Papers$Semester[11]` <br> **Convenor:** `r Papers$Convenor[11]` <br> **Email:** `r Papers$Email[11]` <br> **Pre-Reqs:** `r Papers$PreReqs[11]` <br> **Restrictions:** `r Papers$Restrictions[11]`  
 
 ```{r PUBH204_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "PUBH 204")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 204")
+text <- make_paper_outcomes(Papers = Papers, Paper = "PUBH 204", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 204")
 ```
 
+
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
-### **`r Papers$PaperCode[12]`** <br> _(`r Papers$PaperTitle[12]`)_ <br> **Semester:** `r Papers$Semester[12]` <br> **Convenor:** `r Papers$Convenor[12]` <br> **Email:** `r Papers$Email[12]` <br> **Pre-Reqs:** `r Papers$PreReqs[12]` <br> **Restrictions:** `r Papers$Restrictions[12]`  
+# **`r Papers$PaperCode[12]`** _(`r Papers$PaperTitle[12]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[12]`** <br> _(`r Papers$PaperTitle[12]`)_ <br> **Semester:** `r Papers$Semester[12]` <br> **Convenor:** `r Papers$Convenor[12]` <br> **Email:** `r Papers$Email[12]` <br> **Pre-Reqs:** `r Papers$PreReqs[12]` <br> **Restrictions:** `r Papers$Restrictions[12]`  
 
 ```{r PUBH211_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "PUBH 211")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 204")
+text <- make_paper_outcomes(Papers = Papers, Paper = "PUBH 211", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 204")
 ```
 
+
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
-### **`r Papers$PaperCode[13]`** <br> _(`r Papers$PaperTitle[13]`)_ <br> **Semester:** `r Papers$Semester[13]` <br> **Convenor:** `r Papers$Convenor[13]` <br> **Email:** `r Papers$Email[13]` <br> **Pre-Reqs:** `r Papers$PreReqs[13]` <br> **Restrictions:** `r Papers$Restrictions[13]`  
+# **`r Papers$PaperCode[13]`** _(`r Papers$PaperTitle[13]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[13]`** <br> _(`r Papers$PaperTitle[13]`)_ <br> **Semester:** `r Papers$Semester[13]` <br> **Convenor:** `r Papers$Convenor[13]` <br> **Email:** `r Papers$Email[13]` <br> **Pre-Reqs:** `r Papers$PreReqs[13]` <br> **Restrictions:** `r Papers$Restrictions[13]`  
 
 ```{r PUBH303_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "PUBH 303")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 303")
+text <- make_paper_outcomes(Papers = Papers, Paper = "PUBH 303", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 303")
 ```
 
+
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
-### **`r Papers$PaperCode[14]`** <br> _(`r Papers$PaperTitle[14]`)_ <br> **Semester:** `r Papers$Semester[14]` <br> **Convenor:** `r Papers$Convenor[14]` <br> **Email:** `r Papers$Email[14]` <br> **Pre-Reqs:** `r Papers$PreReqs[14]` <br> **Restrictions:** `r Papers$Restrictions[14]`  
+# **`r Papers$PaperCode[14]`** _(`r Papers$PaperTitle[14]`)_ {data-navmenu="Paper Information"}  
+
+**`r Papers$PaperCode[14]`** <br> _(`r Papers$PaperTitle[14]`)_ <br> **Semester:** `r Papers$Semester[14]` <br> **Convenor:** `r Papers$Convenor[14]` <br> **Email:** `r Papers$Email[14]` <br> **Pre-Reqs:** `r Papers$PreReqs[14]` <br> **Restrictions:** `r Papers$Restrictions[14]`  
 
 ```{r PUBH304_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "PUBH 304")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 304")
+text <- make_paper_outcomes(Papers = Papers, Paper = "PUBH 304", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 304")
 ```
 
+
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
-### **`r Papers$PaperCode[15]`** <br> _(`r Papers$PaperTitle[15]`)_ <br> **Semester:** `r Papers$Semester[15]` <br> **Convenor:** `r Papers$Convenor[15]` <br> **Email:** `r Papers$Email[15]` <br> **Pre-Reqs:** `r Papers$PreReqs[15]` <br> **Restrictions:** `r Papers$Restrictions[15]`  
+# **`r Papers$PaperCode[15]`** _(`r Papers$PaperTitle[15]`)_ {data-navmenu="Paper Information"}  
+
+**`r Papers$PaperCode[15]`** <br> _(`r Papers$PaperTitle[15]`)_ <br> **Semester:** `r Papers$Semester[15]` <br> **Convenor:** `r Papers$Convenor[15]` <br> **Email:** `r Papers$Email[15]` <br> **Pre-Reqs:** `r Papers$PreReqs[15]` <br> **Restrictions:** `r Papers$Restrictions[15]`  
 
 ```{r PUBH311_Paper_Learning_Objectives}
-text <- make_paper_info(Papers = Papers, Paper = "PUBH 311")
-assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 311")
+text <- make_paper_outcomes(Papers = Papers, Paper = "PUBH 311", Outcome_list = Outcome_list)
+# assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 311")
 ```
 
+
+## Column  
 `r text`  
 
--------------------------------------  
-`r assess`  
+## Column  
 
