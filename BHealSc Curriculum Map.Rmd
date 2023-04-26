@@ -74,7 +74,7 @@ make_paper_summary <- function(Papers, Paper = "CMHC 201") {
   Papers <- Papers %>%
     filter(PaperCode == Paper)
   
-  text <- paste0("<b>", Papers$PaperCode[1], "</b> <br> <i>(", Papers$PaperTitle[1], ")</i> <br> <b>Semester:</b> ", Papers$Semester[1], " <br> <b>Convenor:</b> ", Papers$Convenor[1], " <br> <b>Email:</b> ", Papers$Email[1], " <br> <b>Pre-Reqs:</b> ", Papers$PreReqs[1], " <br> <b>Restrictions:</b> ", Papers$Restrictions[1])
+  text <- paste0("<par><b>", Papers$PaperCode[1], "</b> <br> <i>(", Papers$PaperTitle[1], ")</i> <br> <b>Semester:</b> ", Papers$Semester[1], " <br> <b>Convenor:</b> ", Papers$Convenor[1], " <br> <b>Email:</b> ", Papers$Email[1], " <br> <b>Pre-Reqs:</b> ", Papers$PreReqs[1], " <br> <b>Restrictions:</b> ", Papers$Restrictions[1], "</par><br><br><b>Paper Webpage Description:</b><br>", Papers$Paper_Description[1])
 
   sizeableCard(HTML(text))
 }
