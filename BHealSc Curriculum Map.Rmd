@@ -74,7 +74,7 @@ make_paper_summary <- function(Papers, Paper = "CMHC 201") {
   Papers <- Papers %>%
     filter(PaperCode == Paper)
   
-  text <- paste0("<par><b>", Papers$PaperCode[1], "</b> <br> <i>(", Papers$PaperTitle[1], ")</i> <br> <b>Semester:</b> ", Papers$Semester[1], " <br> <b>Convenor:</b> ", Papers$Convenor[1], " <br> <b>Email:</b> ", Papers$Email[1], " <br> <b>Pre-Reqs:</b> ", Papers$PreReqs[1], " <br> <b>Restrictions:</b> ", Papers$Restrictions[1], "</par><br><br><b>Paper Webpage Description:</b><br>", Papers$Paper_Description[1])
+  text <- paste0("<par><b>", Papers$PaperCode[1], "</b> <br> <i>(", Papers$PaperTitle[1], ")</i> <br> <b>Semester:</b> ", Papers$Semester[1], " <br> <b>Convenor:</b> ", Papers$Convenor[1], " <br> <b>Email:</b> ", Papers$Email[1], " <br> <b>Pre-Reqs:</b> ", Papers$PreReqs[1], " <br> <b>Restrictions:</b> ", Papers$Restrictions[1], "<br><br><b>Terms Requirement for Tutorials?</b> ", Papers$Terms_Tutorials[1], "</par><br><br><b>Paper Webpage Description:</b><br>", Papers$Paper_Description[1])
 
   sizeableCard(HTML(text))
 }
@@ -160,16 +160,25 @@ make_paper_outcomes <- function(Papers, Paper = "CMHC 201", Outcome_list = Outco
           sep = "",
           na.rm = TRUE)
 
-  datatable(tb,
+    datatable(select(tb, Learning_Objective),
            class = 'hover stripe',
            rownames = FALSE,
-           colnames = c("Learning Objectives", "BHealSc Outcomes"),
+           colnames = c("Learning Objectives"),
            escape = 1,
            options = list(dom = 't',
                           autoWidth = TRUE,
                           ordering = FALSE,
                           pageLength = nrow(tb)))
-  
+  # datatable(tb,
+  #          class = 'hover stripe',
+  #          rownames = FALSE,
+  #          colnames = c("Learning Objectives", "BHealSc Outcomes"),
+  #          escape = 1,
+  #          options = list(dom = 't',
+  #                         autoWidth = TRUE,
+  #                         ordering = FALSE,
+  #                         pageLength = nrow(tb)))
+  # 
 }
 
 make_paper_assess_info <- function(Papers, Paper = "CMHC 201") {
@@ -693,6 +702,8 @@ make_tippy(letter = Map_Outcomes$Letter[17],
 
 # **`r Papers$PaperCode[1]`** _(`r Papers$PaperTitle[1]`)_ {data-navmenu="Paper Information"}
 
+**`r Papers$PaperCode[1]`** _(`r Papers$PaperTitle[1]`)_
+
 ## Column {.tabset}  
 
 ### Paper Summary  
@@ -711,7 +722,7 @@ text <- make_paper_outcomes(Papers = Papers, Paper = "CMHC 201", Outcome_list = 
 assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 201")
 ```
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 
 `r text`  
 
@@ -721,6 +732,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 201")
 
 
 # **`r Papers$PaperCode[2]`** _(`r Papers$PaperTitle[2]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[2]`** _(`r Papers$PaperTitle[2]`)_
 
 ## Column {.tabset}  
 
@@ -739,7 +752,7 @@ make_paper_summary_outcomes(Papers, "CMHC 211", Outcome_list = Outcome_list)
 text <- make_paper_outcomes(Papers = Papers, Paper = "CMHC 211", Outcome_list = Outcome_list)
 assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 211")
 ```
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 
 `r text`  
 
@@ -749,6 +762,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 211")
 `r assess`  
 
 # **`r Papers$PaperCode[3]`** _(`r Papers$PaperTitle[3]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[3]`** _(`r Papers$PaperTitle[3]`)_
 
 ## Column {.tabset}  
 
@@ -768,7 +783,7 @@ text <- make_paper_outcomes(Papers = Papers, Paper = "CMHC 301", Outcome_list = 
 assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 301")
 ```
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 `r text`  
 
 ### Assessment Information  
@@ -777,6 +792,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 301")
 `r assess`  
 
 # **`r Papers$PaperCode[4]`** _(`r Papers$PaperTitle[4]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[4]`** _(`r Papers$PaperTitle[4]`)_
 
 ## Column {.tabset}  
 
@@ -796,7 +813,7 @@ text <- make_paper_outcomes(Papers = Papers, Paper = "CMHC 311", Outcome_list = 
 assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 311")
 ```
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 `r text`  
 
 ### Assessment Information  
@@ -805,6 +822,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "CMHC 311")
 `r assess`  
 
 # **`r Papers$PaperCode[5]`** _(`r Papers$PaperTitle[5]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[5]`** _(`r Papers$PaperTitle[5]`)_
 
 ## Column {.tabset}  
 
@@ -825,7 +844,7 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "MAOH 201")
 ```
 
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 `r text`  
 
 ### Assessment Information  
@@ -833,6 +852,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "MAOH 201")
 `r assess`  
 
 # **`r Papers$PaperCode[6]`** _(`r Papers$PaperTitle[6]`)_ {data-navmenu="Paper Information"}  
+
+**`r Papers$PaperCode[6]`** _(`r Papers$PaperTitle[6]`)_
 
 ## Column {.tabset}  
 
@@ -852,7 +873,7 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "MAOH 301")
 ```
 
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 `r text`  
 
 ### Assessment Information  
@@ -860,6 +881,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "MAOH 301")
 `r assess`  
 
 # **`r Papers$PaperCode[7]`** _(`r Papers$PaperTitle[7]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[7]`** _(`r Papers$PaperTitle[7]`)_
 
 ## Column {.tabset}  
 
@@ -879,7 +902,7 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PACH 201")
 ```
 
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 `r text`  
 
 ### Assessment Information  
@@ -887,6 +910,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PACH 201")
 `r assess`  
 
 # **`r Papers$PaperCode[8]`** _(`r Papers$PaperTitle[8]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[8]`** _(`r Papers$PaperTitle[8]`)_
 
 ## Column {.tabset}  
 
@@ -907,7 +932,7 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PACH 301")
 ```
 
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 `r text`  
 
 ### Assessment Information  
@@ -915,6 +940,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PACH 301")
 `r assess`  
 
 # **`r Papers$PaperCode[9]`** _(`r Papers$PaperTitle[9]`)_ {data-navmenu="Paper Information"}  
+
+**`r Papers$PaperCode[9]`** _(`r Papers$PaperTitle[9]`)_
 
 ## Column {.tabset}  
 
@@ -935,7 +962,7 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 202")
 ```
 
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 `r text`  
 
 ### Assessment Information  
@@ -943,6 +970,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 202")
 `r assess`  
 
 # **`r Papers$PaperCode[10]`** _(`r Papers$PaperTitle[10]`)_ {data-navmenu="Paper Information"}  
+
+**`r Papers$PaperCode[10]`** _(`r Papers$PaperTitle[10]`)_
 
 ## Column {.tabset}  
 
@@ -963,7 +992,7 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 203")
 ```
 
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 `r text`  
 
 ### Assessment Information  
@@ -971,6 +1000,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 203")
 `r assess`  
 
 # **`r Papers$PaperCode[11]`** _(`r Papers$PaperTitle[11]`)_ {data-navmenu="Paper Information"}  
+
+**`r Papers$PaperCode[11]`** _(`r Papers$PaperTitle[11]`)_
 
 ## Column {.tabset}  
 
@@ -991,7 +1022,7 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 204")
 ```
 
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 `r text`  
 
 ### Assessment Information  
@@ -999,6 +1030,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 204")
 `r assess`  
 
 # **`r Papers$PaperCode[12]`** _(`r Papers$PaperTitle[12]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[12]`** _(`r Papers$PaperTitle[12]`)_
 
 ## Column {.tabset}  
 
@@ -1019,7 +1052,7 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 211")
 ```
 
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 `r text`  
 
 ### Assessment Information  
@@ -1027,6 +1060,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 211")
 `r assess`  
 
 # **`r Papers$PaperCode[13]`** _(`r Papers$PaperTitle[13]`)_ {data-navmenu="Paper Information"}
+
+**`r Papers$PaperCode[13]`** _(`r Papers$PaperTitle[13]`)_
 
 ## Column {.tabset}  
 
@@ -1047,7 +1082,7 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 303")
 ```
 
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 `r text`  
 
 ### Assessment Information  
@@ -1055,6 +1090,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 303")
 `r assess`  
 
 # **`r Papers$PaperCode[14]`** _(`r Papers$PaperTitle[14]`)_ {data-navmenu="Paper Information"}  
+
+**`r Papers$PaperCode[14]`** _(`r Papers$PaperTitle[14]`)_
 
 ## Column {.tabset}  
 
@@ -1075,7 +1112,7 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 304")
 ```
 
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 `r text`  
 
 ### Assessment Information  
@@ -1083,6 +1120,8 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 304")
 `r assess`  
 
 # **`r Papers$PaperCode[15]`** _(`r Papers$PaperTitle[15]`)_ {data-navmenu="Paper Information"}  
+
+**`r Papers$PaperCode[15]`** _(`r Papers$PaperTitle[15]`)_
 
 ## Column {.tabset}  
 
@@ -1103,7 +1142,7 @@ assess <- make_paper_assess_info(Papers = Papers, Paper = "PUBH 311")
 ```
 
 
-### Learning Objectives to Outcomes Map  
+### Learning Objectives 
 `r text`  
 
 ### Assessment Information  
